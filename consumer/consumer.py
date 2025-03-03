@@ -7,11 +7,9 @@ from io import BytesIO
 import uuid
 import logging
 
-# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Environment variables with more descriptive defaults
 KAFKA_BROKER = os.getenv("KAFKA_BROKER", "localhost:9092")
 TOPIC_NAME = os.getenv("KAFKA_TOPIC", "data-lake")
 
@@ -20,7 +18,6 @@ MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "admin")
 MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "admin123")
 BUCKET_NAME = os.getenv("MINIO_BUCKET", "data-lake")
 
-# Batch size configuration
 BATCH_SIZE = int(os.getenv("BATCH_SIZE", "100"))
 
 
@@ -36,7 +33,6 @@ def main():
             secure=False
         )
 
-        # Create bucket if needed
         if not client.bucket_exists(BUCKET_NAME):
             client.make_bucket(BUCKET_NAME)
             logger.info(f"Created bucket: {BUCKET_NAME}")
@@ -51,12 +47,12 @@ def main():
         logger.info("Connecting to Kafka...")
         consumer = KafkaConsumer(
             TOPIC_NAME,
-            bootstrap_servers=[KAFKA_BROKER],  # Pass as list for proper parsing
+            bootstrap_servers=[KAFKA_BROKER],
             value_deserializer=lambda v: json.loads(v.decode('utf-8')),
             auto_offset_reset='earliest',
             enable_auto_commit=True,
             group_id='data-lake-consumer',
-            consumer_timeout_ms=30000  # 30 seconds timeout
+            consumer_timeout_ms=30000
         )
         logger.info("Successfully connected to Kafka")
 
@@ -77,16 +73,11 @@ def main():
                 save_batch_to_minio(client, data_list)
                 data_list = []
 
-            # Log progress periodically
-            if message_count % 10 == 0:
-                logger.info(f"Processed {message_count} messages so far")
-
     except KeyboardInterrupt:
         logger.info("Received interrupt signal, shutting down...")
     except Exception as e:
         logger.error(f"Error processing messages: {e}")
     finally:
-        # Save any remaining data
         if data_list:
             save_batch_to_minio(client, data_list)
 
@@ -95,7 +86,6 @@ def main():
 
 
 def save_batch_to_minio(client, data_list):
-    """Save a batch of data to MinIO as CSV"""
     try:
         df = pd.DataFrame(data_list)
         csv_data = df.to_csv(index=False).encode('utf-8')
