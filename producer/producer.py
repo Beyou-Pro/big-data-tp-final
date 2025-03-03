@@ -9,7 +9,10 @@ KAFKA_BROKER = os.getenv("KAFKA_BROKER", "localhost:9092")
 TOPIC_NAME = "data-lake"
 
 DATA_URLS = [
-    "https://www.data.gouv.fr/fr/datasets/r/dfb542cd-a808-41e2-9157-8d39b5c24edb"
+    "https://www.data.gouv.fr/fr/datasets/r/dfb542cd-a808-41e2-9157-8d39b5c24edb",
+    "https://www.data.gouv.fr/fr/datasets/r/b398ede4-75f9-47ac-bfc5-d912c0012880",
+    "https://www.data.gouv.fr/fr/datasets/r/7141612b-8029-44a4-a048-921a85a47b1f",
+    "https://www.data.gouv.fr/fr/datasets/r/bc9d5d13-07cc-4d38-8254-88db065bd42b"
 ]
 
 producer = KafkaProducer(
